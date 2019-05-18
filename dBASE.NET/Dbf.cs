@@ -1,164 +1,224 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace dBASE.NET
 {
-	/// <summary>
-	/// The Dbf class encapsulated a dBASE table (.dbf) file, allowing
-	/// reading from disk, writing to disk, enumerating fields and enumerating records.
-	/// </summary>
-	public class Dbf
-	{
-		private DbfHeader header;
-		private List<DbfField> fields;
-		private List<DbfRecord> records;
+    /// <summary>
+    /// The Dbf class encapsulated a dBASE table (.dbf) file, allowing
+    /// reading from disk, writing to disk, enumerating Fields and enumerating Records.
+    /// </summary>
+    public class Dbf
+    {
+        private readonly string _path;
+        private readonly Encoding _encoding = Encoding.ASCII;
 
-		public Dbf()
-		{
-			this.header = DbfHeader.CreateHeader(DbfVersion.FoxBaseDBase3NoMemo);
-			this.fields = new List<DbfField>();
-			this.records = new List<DbfRecord>();
-		}
+        /// <summary>
+        /// Creates empty dBASE table with default (ASCII) encoding.
+        /// </summary>
+        /// <param name="version"></param>
+        public Dbf(DbfVersion version)
+        {
+            Header = DbfHeader.CreateHeader(version);
+        }
 
-		public List<DbfField> Fields
-		{
-			get
-			{
-				return fields;
-			}
-		}
+        /// <summary>
+        /// Creates empty dBASE table with specified encoding.
+        /// </summary>
+        /// <param name="version"></param>
+        public Dbf(DbfVersion version, Encoding encoding)
+        {
+            _encoding = encoding;
+            Header = DbfHeader.CreateHeader(version);
+        }
 
-		public List<DbfRecord> Records
-		{
-		  get
-			{
-				return records;
-			}
-	  }
+        /// <summary>
+        /// Reads existing dBASE table with default (ASCII) encoding.
+        /// </summary>
+        public Dbf(string dbfPath)
+        {
+            _path = dbfPath;
+            Read();
+        }
 
-		public DbfRecord CreateRecord()
-		{
-			DbfRecord record = new DbfRecord(fields);
-			this.records.Add(record);
-			return record;
-		}
+        /// <summary>
+        /// Reads existing dBASE table with specified encoding.
+        /// </summary>
+        public Dbf(string dbfPath, Encoding encoding)
+        {
+            _path = dbfPath;
+            _encoding = encoding;
+            Read();
+        }
 
-		public void Read(String path)
-		{
-			// Open stream for reading.
-			FileStream stream = File.Open(path, FileMode.Open, FileAccess.Read);
-			BinaryReader reader = new BinaryReader(stream);
+        public List<DbfField> Fields { get; } = new List<DbfField>();
 
-			ReadHeader(reader);
-			byte[] memoData = ReadMemos(path);
-			ReadFields(reader);
+        public List<DbfRecord> Records { get; } = new List<DbfRecord>();
 
-			// After reading the fields, we move the read pointer to the beginning
-			// of the records, as indicated by the "HeaderLength" value in the header.
-			stream.Seek(header.HeaderLength, SeekOrigin.Begin);
+        public List<DbfRecord> ActiveRecords => Records.FindAll(r => !r.IsDeleted);
 
-			ReadRecords(reader, memoData);
+        public List<DbfRecord> DeletedRecords => Records.FindAll(r => r.IsDeleted);
 
-			// Close stream.
-			reader.Close();
-			stream.Close();
-		}
+        internal DbfHeader Header { get; private set; }
 
-		private byte[] ReadMemos(string path)
-		{
-			String memoPath = Path.ChangeExtension(path, "fpt");
-			if (!File.Exists(memoPath))
-			{
-				memoPath = Path.ChangeExtension(path, "dbt");
-				if(!File.Exists(memoPath))
-				{
-					return null;
-				}
-			}
+        internal DbfMemo Memo { get; private set; }
 
-			FileStream str = File.Open(memoPath, FileMode.Open, FileAccess.Read);
-			BinaryReader memoReader = new BinaryReader(str);
-			byte[] memoData = new byte[str.Length];
-			memoData = memoReader.ReadBytes((int)str.Length);
-			memoReader.Close();
-			str.Close();
-			return memoData;
-		}
+        public DbfField AddField(string name, DbfFieldType type, int length)
+        {
+            if (type == DbfFieldType.Memo)
+            {
+                if (Header.Version == DbfVersion.dBase4SQLSystemNoMemo
+                    || Header.Version == DbfVersion.dBase4SQLTableNoMemo
+                    || Header.Version == DbfVersion.FoxBaseDBase3NoMemo)
+                    throw new InvalidOperationException("Memo fields are not supported for this database version.");
 
-		private void ReadHeader(BinaryReader reader)
-		{
-			// Peek at version number, then try to read correct version header.
-			byte versionByte = reader.ReadByte();
-			reader.BaseStream.Seek(0, SeekOrigin.Begin);
-			DbfVersion version = (DbfVersion)versionByte;
-			header = DbfHeader.CreateHeader(version);
-			header.Read(reader);
-		}
+                if (Memo == null)
+                    Memo = CreateMemo();
+            }
 
-		private void ReadFields(BinaryReader reader)
-		{
-			fields.Clear();
+            var field = new DbfField(name, type, length, _encoding);
+            Fields.Add(field);
 
-			// Fields are terminated by 0x0d char.
-			while(reader.PeekChar() != 0x0d)
-			{
-				fields.Add(new DbfField(reader));
-			}
+            return field;
+        }
 
-			// Read fields terminator.
-			reader.ReadByte();
-		}
+        private DbfMemo CreateMemo()
+        {
+            string memoPath = Path.ChangeExtension(_path, "fpt");
 
-		private void ReadRecords(BinaryReader reader, byte[] memoData)
-		{
-			records.Clear();
+            return new DbfMemo(memoPath, _encoding);
+        }
 
-			// Records are terminated by 0x1a char (officially), or EOF (also seen).
-			while(reader.PeekChar() != 0x1a && reader.PeekChar() != -1)
-			{
-				records.Add(new DbfRecord(reader, header, fields, memoData));
-			}
-		}
+        public void DeleteRecord(DbfRecord record)
+        {
+            record.Delete();
+        }
 
-		public void Write(String path, DbfVersion version = DbfVersion.Unknown)
-		{
-			// Use version specified. If unknown specified, use current header version.
-			if (version != DbfVersion.Unknown) header.Version = version;
-			header = DbfHeader.CreateHeader(header.Version);
+        public void DeleteRecord(int index)
+        {
+            Records[index].Delete();
+        }
 
-			FileStream stream = File.Open(path, FileMode.Create, FileAccess.Write);
-			BinaryWriter writer = new BinaryWriter(stream);
+        public void UndeleteRecord(DbfRecord record)
+        {
+            record.Undelete();
+        }
 
-			header.Write(writer, fields, records);
-			WriteFields(writer);
-			WriteRecords(writer);
+        public void UndeleteRecord(int index)
+        {
+            Records[index].Undelete();
+        }
 
-			writer.Close();
-			stream.Close();
-		}
+        public DbfMemoEntry CreateMemoEntry(string value)
+        {
+            return Memo.CreateEntry(value);
+        }
 
-		private void WriteFields(BinaryWriter writer)
-		{
-			foreach(DbfField field in fields)
-			{
-				field.Write(writer);
-			}
-			// Write field descriptor array terminator.
-			writer.Write((byte)0x0d);
-		}
+        public void Read()
+        {
+            // Open stream for reading.
+            using (FileStream stream = File.Open(_path, FileMode.Open, FileAccess.Read))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                ReadHeader(reader);
+                Memo = ReadMemo();
+                ReadFields(reader);
 
-		private void WriteRecords(BinaryWriter writer)
-		{
-			foreach(DbfRecord record in records)
-			{
-				record.Write(writer);
-			}
-			// Write EOF character.
-			writer.Write((byte)0x1a);
-		}
-	}
+                // After reading the Fields, we move the read pointer to the beginning
+                // of the Records, as indicated by the "HeaderLength" value in the header.
+                stream.Seek(Header.HeaderLength, SeekOrigin.Begin);
+
+                ReadRecords(reader);
+            }
+        }
+
+        private DbfMemo ReadMemo()
+        {
+            string memoPath = Path.ChangeExtension(_path, "fpt");
+            if (!File.Exists(memoPath))
+            {
+                memoPath = Path.ChangeExtension(_path, "dbt");
+                if (!File.Exists(memoPath))
+                    return null;
+            }
+
+            return new DbfMemo(memoPath, _encoding);
+        }
+
+        private void ReadHeader(BinaryReader reader)
+        {
+            // Peek at version number, then try to read correct version header.
+            byte versionByte = reader.ReadByte();
+            reader.BaseStream.Seek(0, SeekOrigin.Begin);
+            DbfVersion version = (DbfVersion)versionByte;
+            Header = DbfHeader.CreateHeader(version);
+            Header.Read(reader);
+        }
+
+        private void ReadFields(BinaryReader reader)
+        {
+            Fields.Clear();
+
+            // Fields are terminated by 0x0d char.
+            while (reader.PeekChar() != 0x0d)
+            {
+                Fields.Add(new DbfField(reader, _encoding));
+            }
+
+            // Read Fields terminator.
+            reader.ReadByte();
+        }
+
+        private void ReadRecords(BinaryReader reader)
+        {
+            Records.Clear();
+
+            // Records are terminated by 0x1a char (officially), or EOF (also seen).
+            while (reader.PeekChar() != 0x1a && reader.PeekChar() != -1)
+            {
+                Records.Add(new DbfRecord(this, reader));
+            }
+        }
+
+        public void Save()
+        {
+            if (_path == null)
+                throw new InvalidOperationException("Database path is not specified.");
+
+            SaveTo(_path);
+        }
+
+        public void SaveTo(string path)
+        {
+            using (var stream = File.Open(path, FileMode.Create, FileAccess.Write))
+            using (var writer = new BinaryWriter(stream))
+            {
+                Header.Write(writer, Fields, Records);
+                WriteFields(writer);
+                WriteRecords(writer);
+            }
+
+            if (Memo != null)
+                Memo.Save();
+        }
+
+        private void WriteFields(BinaryWriter writer)
+        {
+            foreach (DbfField field in Fields)
+                field.Write(writer);
+            
+            // Write field descriptor array terminator.
+            writer.Write((byte)0x0d);
+        }
+
+        private void WriteRecords(BinaryWriter writer)
+        {
+            foreach (DbfRecord record in Records)
+                record.Write(writer);
+            
+            // Write EOF character.
+            writer.Write((byte)0x1a);
+        }
+    }
 }

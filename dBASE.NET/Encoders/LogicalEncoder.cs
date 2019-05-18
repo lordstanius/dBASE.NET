@@ -1,46 +1,38 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace dBASE.NET.Encoders
 {
-	internal class LogicalEncoder: IEncoder
-	{
-		private static LogicalEncoder instance = null;
+    internal class LogicalEncoder : Encoder
+    {
+        public LogicalEncoder(Encoding encoding) : base(encoding) { }
 
-		private LogicalEncoder() { }
-
-		public static LogicalEncoder Instance
-		{
-			get
-			{
-				if (instance == null) instance = new LogicalEncoder();
-				return instance;
-			}
-		}
-
-		public byte[] Encode(DbfField field, object data)
-		{
-			// Convert boolean value to string.
-			string text = "?";
-			if(data != null) { 
-				text = (bool)data == true ? "Y" : "N";
-		  }
-
-		  // Grow string to fill field length.
-		  text = text.PadLeft(field.Length, ' ');
-
-			// Convert string to byte array.
-			return Encoding.ASCII.GetBytes(text);
-		}
-
-        public object Decode(byte[] buffer, byte[] memoData)
+        public override byte[] Encode(DbfField field, object data)
         {
-            string text = Encoding.ASCII.GetString(buffer).Trim().ToUpper();
+            // Convert boolean value to string.
+            string text = "?";
+            if (data != null)
+            {
+                text = (bool)data == true ? "Y" : "N";
+            }
+
+            // Grow string to fill field length.
+            text = text.PadLeft(field.Length, ' ');
+
+            // Convert string to byte array.
+            return Encoding.GetBytes(text);
+        }
+
+        public override object Decode(ArraySegment<byte> bytes, DbfMemo memo)
+        {
+            string text = Encoding.GetString(bytes.Array, bytes.Offset, bytes.Count).Trim().ToUpper();
             if (text == "?") return null;
             return (text == "Y" || text == "T");
+        }
+
+        public override object Parse(string value)
+        {
+            return bool.Parse(value);
         }
     }
 }

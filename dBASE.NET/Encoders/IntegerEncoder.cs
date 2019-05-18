@@ -1,36 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace dBASE.NET.Encoders
 {
-	public class IntegerEncoder: IEncoder
-	{
-		private static IntegerEncoder instance = null;
+    internal class IntegerEncoder : Encoder
+    {
+        public IntegerEncoder(Encoding encoding) : base(encoding) { }
 
-		private IntegerEncoder() { }
-
-		public static IntegerEncoder Instance
-		{
-			get
-			{
-				if (instance == null) instance = new IntegerEncoder();
-				return instance;
-			}
-		}
-
-		public byte[] Encode(DbfField field, object data)
-		{
-			int value = 0;
-			if (data != null) value = (int)data;
-			return BitConverter.GetBytes(value);
-		}
-
-        public object Decode(byte[] buffer, byte[] memoData)
+        public override byte[] Encode(DbfField field, object data)
         {
-            return BitConverter.ToInt32(buffer, 0);
+            int value = 0;
+            if (data != null) value = (int)data;
+            return BitConverter.GetBytes(value);
+        }
+
+        public override object Decode(ArraySegment<byte> bytes, DbfMemo memo)
+        {
+            return BitConverter.ToInt32(bytes.Array, bytes.Offset);
+        }
+
+        public override object Parse(string value)
+        {
+            return int.Parse(value, CultureInfo.InvariantCulture);
         }
     }
 }

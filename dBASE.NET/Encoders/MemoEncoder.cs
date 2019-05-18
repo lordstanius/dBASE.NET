@@ -1,59 +1,60 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace dBASE.NET.Encoders
 {
-	internal class MemoEncoder: IEncoder
-	{
-		private static MemoEncoder instance = null;
+    internal class MemoEncoder : Encoder
+    {
+        public MemoEncoder(Encoding encoding) : base(encoding) { }
 
-		private MemoEncoder() { }
-
-		public static MemoEncoder Instance
-		{
-			get
-			{
-				if (instance == null) instance = new MemoEncoder();
-				return instance;
-			}
-		}
-
-		public byte[] Encode(DbfField field, object data)
-		{
-			return null;
-		}
-
-        public object Decode(byte[] buffer, byte[] memoData)
+        public override byte[] Encode(DbfField field, object data)
         {
-            int index = 0;
-            // Memo fields of 5+ byts in length store their index in text, e.g. "     39394"
+            var entry = (DbfMemoEntry)data;
+
+            if (field.Length > 4)
+                return data == null
+                    ? Enumerable.Repeat((byte)' ', field.Length).ToArray()
+                    : Encoding.GetBytes(entry.Index.ToString().PadLeft(field.Length));
+
+            return data == null ? (new byte[4]) : BitConverter.GetBytes(entry.Index);
+        }
+
+        public override object Decode(ArraySegment<byte> bytes, DbfMemo memo)
+        {
+            int index;
+            // Memo fields of 5+ bytes in length store their index in text, e.g. "     39394"
             // Memo fields of 4 bytes store their index as an int.
-            if (buffer.Length > 4)
+            if (bytes.Count > 4)
             {
-                string text = Encoding.ASCII.GetString(buffer).Trim();
-                if (text.Length == 0) return null;
+                string text = Encoding.ASCII.GetString(bytes.Array, bytes.Offset, bytes.Count).Trim();
+                if (text.Length == 0)
+                    return null;
+
                 index = Convert.ToInt32(text);
             }
             else
             {
-                index = BitConverter.ToInt32(buffer, 0);
+                index = BitConverter.ToInt32(bytes.Array, bytes.Offset);
                 if (index == 0) return null;
             }
-            return findMemo(index, memoData);
+
+            return memo.GetMemo(index);
         }
 
-        private static string findMemo(int index, byte[] memoData)
+        public override object Parse(string value)
         {
-            // The index is measured from the start of the file, even though the memo file header blocks takes
-            // up the first few index positions.
-            UInt16 blockSize = BitConverter.ToUInt16(memoData.Skip(6).Take(2).Reverse().ToArray(), 0);
-            int type = (int)BitConverter.ToUInt32(memoData.Skip(index * blockSize).Take(4).Reverse().ToArray(), 0);
-            int length = (int)BitConverter.ToUInt32(memoData.Skip(index * blockSize + 4).Take(4).Reverse().ToArray(), 0);
-            string text = Encoding.ASCII.GetString(memoData.Skip(index * blockSize + 8).Take(length).ToArray()).Trim();
-            return text;
+            return new DbfMemoEntry(
+                index: int.Parse(value.Substring(value.LastIndexOf('@') + 1), CultureInfo.InvariantCulture),
+                value: value.Remove(value.LastIndexOf('@')));
+        }
+
+        public override string ToString(object value)
+        {
+            var memoEntry = value as DbfMemoEntry;
+
+            return string.Format(CultureInfo.InvariantCulture, "{0}@{1}", memoEntry.Value, memoEntry.Index);
         }
     }
 }

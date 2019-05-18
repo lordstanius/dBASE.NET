@@ -14,8 +14,7 @@ namespace dBASE.NET.Tests
 		[TestInitialize]
 		public void testInit()
 		{
-			dbf = new Dbf();
-			dbf.Read("fixtures/8b/dbase_8b.dbf");
+			dbf = new Dbf("fixtures/8b/dbase_8b.dbf");
 		}
 
 		[TestMethod]

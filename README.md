@@ -88,14 +88,14 @@ dbf.Write("test.dbf", DbfVersion.VisualFoxPro);
 
 | Code | Field type   | .NET counterpart |
 |:-----|:-------------|:-----------------|
-| `C`  | Character string | String |
+| `C`  | Character string | String   |
 | `D`  | Date             | DateTime |
-| `I`  | Integer          | Int32 |
-| `L`  | Logical          | Bool |
-| `M`  | Memo             | String |
-| `N`  | Numeric          | Float |
+| `I`  | Integer          | Int32    |
+| `L`  | Logical          | Bool     |
+| `M`  | Memo             | String   |
+| `N`  | Numeric          | Float    |
 | `T`  | DateTime         | DateTime |
-| `Y`  | Currency         | Float |
+| `Y`  | Currency         | Decimal  |
 
 
 ## Class diagram

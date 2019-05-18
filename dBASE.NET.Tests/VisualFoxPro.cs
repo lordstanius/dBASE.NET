@@ -16,8 +16,7 @@ namespace dBASE.NET.Tests
 		[TestInitialize]
 		public void testInit()
 		{
-			dbf = new Dbf();
-			dbf.Read("fixtures/30/dbase_30.dbf");
+			dbf = new Dbf("fixtures/30/dbase_30.dbf");
 		}
 
 		[TestMethod]
@@ -35,7 +34,7 @@ namespace dBASE.NET.Tests
 		[TestMethod]
 		public void MemoTest()
 		{
-			Assert.AreEqual("Domestic Life\r\nWeddings", dbf.Records[0][10], "Wrong data in memo field");
+			Assert.AreEqual("Domestic Life\r\nWeddings\r\n", dbf.Records[0][10].ToString(), "Wrong data in memo field");
 		}
 
 		[TestMethod]

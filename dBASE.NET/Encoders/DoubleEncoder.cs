@@ -4,9 +4,9 @@ using System.Text;
 
 namespace dBASE.NET.Encoders
 {
-    internal class FloatEncoder : Encoder
+    internal class DoubleEncoder : Encoder
     {
-        public FloatEncoder(Encoding encoding) : base(encoding) { }
+        public DoubleEncoder(Encoding encoding) : base(encoding) { }
 
         public override byte[] Encode(DbfField field, object data)
         {
@@ -24,12 +24,12 @@ namespace dBASE.NET.Encoders
             if (text.Length == 0)
                 return null;
 
-            return Convert.ToSingle(text, CultureInfo.InvariantCulture);
+            return Convert.ToDouble(text, CultureInfo.InvariantCulture);
         }
 
         public override object Parse(string value)
         {
-            return float.Parse(value, CultureInfo.InvariantCulture);
+            return double.Parse(value, CultureInfo.InvariantCulture);
         }
     }
 }

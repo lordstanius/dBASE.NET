@@ -1,38 +1,35 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace dBASE.NET.Encoders
 {
-	internal class NumericEncoder: IEncoder
-	{
-		private static NumericEncoder instance = null;
+    internal class NumericEncoder : Encoder
+    {
+        public NumericEncoder(Encoding encoding) : base(encoding) { }
 
-		private NumericEncoder() { }
-
-		public static NumericEncoder Instance
-		{
-			get
-			{
-				if (instance == null) instance = new NumericEncoder();
-				return instance;
-			}
-		}
-
-		public byte[] Encode(DbfField field, object data)
-		{
-      string text = Convert.ToString(data, System.Globalization.CultureInfo.InvariantCulture).PadLeft(field.Length, ' ');      
-			if (text.Length > field.Length) text.Substring(0, field.Length);
-			return Encoding.ASCII.GetBytes(text);
-		}
-
-        public object Decode(byte[] buffer, byte[] memoData)
+        public override byte[] Encode(DbfField field, object data)
         {
-            string text = Encoding.ASCII.GetString(buffer).Trim();
-            if (text.Length == 0) return null;
-            return Convert.ToSingle(text, System.Globalization.CultureInfo.InvariantCulture);
+            string format = $"{{0,{field.Length}:0.{new string('0', field.Precision)}}}";
+            string text = string.Format(CultureInfo.InvariantCulture, format, data);
+            if (text.Length > field.Length)
+                text.Substring(0, field.Length);
+
+            return this.Encoding.GetBytes(text);
+        }
+
+        public override object Decode(ArraySegment<byte> bytes, DbfMemo memo)
+        {
+            string text = this.Encoding.GetString(bytes.Array, bytes.Offset, bytes.Count).Trim();
+            if (text.Length == 0)
+                return null;
+
+            return Convert.ToDecimal(text, CultureInfo.InvariantCulture);
+        }
+
+        public override object Parse(string value)
+        {
+            return decimal.Parse(value, CultureInfo.InvariantCulture);
         }
     }
 }
