@@ -64,15 +64,15 @@ dbf.SaveTo("test.dbf");
 | Code | Field type       | .NET counterpart |
 |:-----|:-------------    |:-----------------|
 | `C`  | Character string | String           |
-| `D`  | Date             | DateTime         |
-| `I`  | Integer          | Int32            |
-| `L`  | Logical          | Bool             |
 | `M`  | Memo             | String           |
-| `N`  | Numeric          | Decimal          |
+| `D`  | Date             | DateTime         |
 | `T`  | DateTime         | DateTime         |
-| `Y`  | Currency         | Decimal          |
+| `L`  | Logical          | Bool             |
+| `I`  | Integer          | Int32            |
+| `Y`  | Currency         | Int64            |
 | `F`  | Float            | Float            |
 | `B`  | Double           | Double           |
+| `N`  | Numeric          | Decimal          |
 
 
 ## Class diagram

@@ -64,6 +64,14 @@ namespace dBASE.NET
 
         internal DbfMemo Memo { get; private set; }
 
+        public DbfRecord CreateRecord()
+        {
+            var record = new DbfRecord(Fields);
+            Records.Add(record);
+
+            return record;
+        }
+
         public DbfField AddField(string name, DbfFieldType type, int length)
         {
             if (type == DbfFieldType.Memo)

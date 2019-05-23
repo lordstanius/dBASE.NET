@@ -10,16 +10,16 @@ namespace dBASE.NET.Encoders
 
         public override byte[] Encode(DbfField field, object data)
         {
-            float value = 0;
-            if (data != null)
-                value = (float)data;
+            if (data == null)
+                return null;
 
-            return BitConverter.GetBytes(value);
+            System.Diagnostics.Debug.Assert(field.Length == 8);
+            return BitConverter.GetBytes((long)data);
         }
 
         public override object Decode(ArraySegment<byte> bytes, DbfMemo memo)
         {
-            return BitConverter.ToSingle(bytes.Array, bytes.Offset);
+            return BitConverter.ToInt64(bytes.Array, bytes.Offset);
         }
 
         public override object Parse(string value)

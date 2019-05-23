@@ -178,15 +178,15 @@ namespace dBASE.NET.Tests
         public void CurrencyField()
         {
             dbf = new Dbf(DbfVersion.VisualFoxPro);
-            dbf.AddField("TEST", DbfFieldType.Currency, 4);
+            dbf.AddField("TEST", DbfFieldType.Currency, 8);
             DbfRecord record = new DbfRecord(dbf.Fields);
             dbf.Records.Add(record);
-            record.Data[0] = 4.34F;
+            record.Data[0] = 138799L;
             dbf.SaveTo("test.dbf");
 
             dbf = new Dbf("test.dbf");
 
-            Assert.AreEqual((float)4.34, dbf.Records[0][0], "Record content should be 4.34.");
+            Assert.AreEqual(138799L, dbf.Records[0][0], "Record content should be ");
         }
     }
 }
