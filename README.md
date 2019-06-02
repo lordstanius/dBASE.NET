@@ -77,10 +77,10 @@ dbf.SaveTo("test.dbf");
 
 ## Class diagram
 
-![Class diagram](http://yuml.me/1cc9f823.png)
+![Class diagram](http://yuml.me/045da3e6.png)
 
 _yuml:_
 
 ```
-http://yuml.me/diagram/scruffy/class/edit/[Dbf]+->[DbfRecord], [Dbf]+->[DbfField], [DbfRecord]+->[DbfField], [Dbf]->[DbfHeader], [DbfHeader]^-[Dbf4Header]
+http://yuml.me/diagram/scruffy/class/edit/[Dbf]+->[DbfRecord], [Dbf]+->[DbfField], [DbfRecord]+->[DbfField], [Dbf]->[DbfHeader]
 ```` 
