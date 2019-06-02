@@ -68,6 +68,12 @@ namespace dBASE.NET
 
         public object this[int index] => Data[index];
 
+        public object this[DbfField field]
+        {
+            get => this[field.Name];
+            set => this[field.Name] = value;
+        }
+
         public object this[string name]
         {
             get => GetData(name);
@@ -97,12 +103,6 @@ namespace dBASE.NET
                 throw new IndexOutOfRangeException($"Field '{fieldName}' does not exist.");
 
             return Data[index];
-        }
-
-        public object this[DbfField field]
-        {
-            get => this[field.Name];
-            set => this[field.Name] = value;
         }
 
         internal void Write(BinaryWriter writer)
