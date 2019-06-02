@@ -35,11 +35,11 @@
       <FileName>DbfHeader.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="dBASE.NET.Dbf4Header" Collapsed="true">
+  <Class Name="dBASE.NET.Dbf3Header" Collapsed="true">
     <Position X="4.75" Y="0.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Dbf4Header.cs</FileName>
+      <FileName>Dbf3Header.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />
