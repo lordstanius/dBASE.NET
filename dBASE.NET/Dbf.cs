@@ -72,7 +72,7 @@ namespace dBASE.NET
             return record;
         }
 
-        public DbfField AddField(string name, DbfFieldType type, int length)
+        public DbfField AddNewField(string name, DbfFieldType type, int length)
         {
             if (type == DbfFieldType.Memo)
             {

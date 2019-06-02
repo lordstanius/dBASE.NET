@@ -9,7 +9,7 @@ namespace dBASE.NET.Tests
         public void DemoCode()
         {
             var dbf = new Dbf(DbfVersion.FoxPro2WithMemo);
-            DbfField testField = dbf.AddField("TEST", DbfFieldType.Character, 12);
+            DbfField testField = dbf.AddNewField("TEST", DbfFieldType.Character, 12);
             DbfRecord record = dbf.CreateRecord();
             record[testField] = "HELLO";
             dbf.SaveTo("test.dbf");

@@ -40,7 +40,7 @@ namespace dBASE.NET.Tests
         public void WriteOneField()
         {
             dbf = new Dbf(DbfVersion.VisualFoxPro);
-            dbf.AddField("TEST", DbfFieldType.Character, 12);
+            dbf.AddNewField("TEST", DbfFieldType.Character, 12);
             dbf.SaveTo("test.dbf");
 
             dbf = new Dbf("test.dbf");
@@ -52,7 +52,7 @@ namespace dBASE.NET.Tests
         public void WriteFieldAndRecord()
         {
             dbf = new Dbf(DbfVersion.VisualFoxPro);
-            dbf.AddField("TEST", DbfFieldType.Character, 12);
+            dbf.AddNewField("TEST", DbfFieldType.Character, 12);
             DbfRecord record = new DbfRecord(dbf.Fields);
             dbf.Records.Add(record);
             record.Data[0] = "HELLO";
@@ -67,7 +67,7 @@ namespace dBASE.NET.Tests
         public void WriteFieldAndThreeRecords()
         {
             dbf = new Dbf(DbfVersion.VisualFoxPro);
-            dbf.AddField("TEST", DbfFieldType.Character, 12);
+            dbf.AddNewField("TEST", DbfFieldType.Character, 12);
             DbfRecord record = new DbfRecord(dbf.Fields);
             dbf.Records.Add(record);
             record.Data[0] = "HELLO";
@@ -88,7 +88,7 @@ namespace dBASE.NET.Tests
         public void NumericField()
         {
             dbf = new Dbf(DbfVersion.VisualFoxPro);
-            dbf.AddField("TEST", DbfFieldType.Numeric, 12);
+            dbf.AddNewField("TEST", DbfFieldType.Numeric, 12);
             DbfRecord record = new DbfRecord(dbf.Fields);
             dbf.Records.Add(record);
             record.Data[0] = 3.14;
@@ -103,7 +103,7 @@ namespace dBASE.NET.Tests
         public void FloatField()
         {
             dbf = new Dbf(DbfVersion.VisualFoxPro);
-            dbf.AddField("TEST", DbfFieldType.Float, 12);
+            dbf.AddNewField("TEST", DbfFieldType.Float, 12);
             DbfRecord record = new DbfRecord(dbf.Fields);
             dbf.Records.Add(record);
             record.Data[0] = 3.14;
@@ -118,7 +118,7 @@ namespace dBASE.NET.Tests
         public void LogicalField()
         {
             dbf = new Dbf(DbfVersion.VisualFoxPro);
-            dbf.AddField("TEST", DbfFieldType.Logical, 12);
+            dbf.AddNewField("TEST", DbfFieldType.Logical, 12);
             DbfRecord record = new DbfRecord(dbf.Fields);
             dbf.Records.Add(record);
             record.Data[0] = true;
@@ -133,7 +133,7 @@ namespace dBASE.NET.Tests
         public void DateField()
         {
             dbf = new Dbf(DbfVersion.VisualFoxPro);
-            dbf.AddField("TEST", DbfFieldType.Date, 12);
+            dbf.AddNewField("TEST", DbfFieldType.Date, 12);
             DbfRecord record = new DbfRecord(dbf.Fields);
             dbf.Records.Add(record);
             record.Data[0] = new DateTime(2018, 8, 7);
@@ -148,7 +148,7 @@ namespace dBASE.NET.Tests
         public void DateTimeField()
         {
             dbf = new Dbf(DbfVersion.VisualFoxPro);
-            dbf.AddField("TEST", DbfFieldType.DateTime, 8);
+            dbf.AddNewField("TEST", DbfFieldType.DateTime, 8);
             DbfRecord record = new DbfRecord(dbf.Fields);
             dbf.Records.Add(record);
             record.Data[0] = new DateTime(2018, 8, 7, 20, 15, 8);
@@ -163,7 +163,7 @@ namespace dBASE.NET.Tests
         public void IntegerField()
         {
             dbf = new Dbf(DbfVersion.VisualFoxPro);
-            dbf.AddField("TEST", DbfFieldType.Integer, 4);
+            dbf.AddNewField("TEST", DbfFieldType.Integer, 4);
             DbfRecord record = new DbfRecord(dbf.Fields);
             dbf.Records.Add(record);
             record.Data[0] = 34;
@@ -178,7 +178,7 @@ namespace dBASE.NET.Tests
         public void CurrencyField()
         {
             dbf = new Dbf(DbfVersion.VisualFoxPro);
-            dbf.AddField("TEST", DbfFieldType.Currency, 8);
+            dbf.AddNewField("TEST", DbfFieldType.Currency, 8);
             DbfRecord record = new DbfRecord(dbf.Fields);
             dbf.Records.Add(record);
             record.Data[0] = 138799L;
