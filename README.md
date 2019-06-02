@@ -55,7 +55,7 @@ This sample code creates a new table with a single character field, then saves t
 var dbf = new Dbf(DbfVersion.FoxPro2WithMemo);
 dbf.AddField("TEST", DbfFieldType.Character, 12);
 DbfRecord record = dbf.CreateRecord();
-record.Data[0] = "HELLO";
+record["TEST"] = "HELLO";
 dbf.SaveTo("test.dbf");
 ```
 
