@@ -18,22 +18,22 @@ namespace dBASE.NET
         /// <summary>
         /// Date of last update.
         /// </summary>
-        public DateTime LastUpdate { get; set; }
+        public DateTime LastUpdate { get; protected set; }
 
         /// <summary>
         /// Number of records in the file.
         /// </summary>
-        public uint NumRecords { get; set; }
+        public uint NumRecords { get; protected set; }
 
         /// <summary>
         ///  Header length in bytes. The records start at this offset in the .dbf file.
         /// </summary>
-        public ushort HeaderLength { get; set; }
+        public ushort HeaderLength { get; protected set; }
 
         /// <summary>
         /// Record length in bytes.
         /// </summary>
-        public ushort RecordLength { get; set; }
+        public ushort RecordLength { get; protected set; }
 
         public static DbfHeader CreateHeader(DbfVersion version)
         {

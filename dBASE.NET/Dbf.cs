@@ -60,7 +60,7 @@ namespace dBASE.NET
 
         public List<DbfRecord> DeletedRecords => Records.FindAll(r => r.IsDeleted);
 
-        internal DbfHeader Header { get; private set; }
+        public DbfHeader Header { get; private set; }
 
         internal DbfMemo Memo { get; private set; }
 
